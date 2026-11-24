@@ -1110,7 +1110,7 @@ const HOME_SHOWDOWN_IMAGE='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABEwAAAW
 function brand(){return `<div class="brand-wrap"><div class="brand">
   <img src="assets/eternian-title.png"
        alt="Eternian Chess"
-       style="display:block;width:115%;max-width:none;height:auto;margin:auto;position:relative;left:-7.5%;">
+       style="display:block;width:130%;max-width:none;height:auto;margin:auto;position:relative;left:-15%;">
 </div><div class="subtitle">Defend Castle Grayskull</div></div>`;}
 function hasResumableGame(){return !!STATE.game&&!STATE.game.result&&!!BOTS[STATE.game.bot]&&unlockedBot(BOTS[STATE.game.bot]);}
 function topbar(){return `<header class="topbar ${STATE.screen==='home'?'home-topbar':''}">${brand()}<div class="top-actions"><button class="small-btn sound-toggle" data-action="sound-toggle" title="${STATE.settings.sound?'Mute all sound':'Turn all sound on'}" aria-label="${STATE.settings.sound?'Mute all sound':'Turn all sound on'}">${STATE.settings.sound?'♫ On':'♪ Off'}</button>${STATE.screen==='home'&&hasResumableGame()?'<button class="small-btn cont-shortcut" data-action="resume" title="Continue current game" aria-label="Continue current game">Cont.</button>':''}<button class="small-btn" data-action="home">⌂ Home</button><button class="small-btn" data-action="records">★ Records</button><button class="small-btn" data-action="settings" aria-label="Settings">⚙</button></div></header>`;}
