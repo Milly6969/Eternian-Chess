@@ -1366,13 +1366,13 @@ function annotationLine(from,to,color,temporary=false){const a=boardCoords(from)
    d+=` L ${bend.x} ${bend.y}`;
  }
  d+=` L ${ex} ${ey}`;
- return `<path class="annotation-arrow" d="${d}" stroke="${ANNOTATION_COLORS[color]||ANNOTATION_COLORS.orange}" stroke-width=".14" marker-end="url(#${id})" opacity="${temporary?.55:.9}"/>`;
+ return `<path class="annotation-arrow" d="${d}" stroke="${ANNOTATION_COLORS[color]||ANNOTATION_COLORS.orange}" stroke-width=".18" marker-end="url(#${id})" opacity="${temporary?.55:.9}"/>`;
 }
 function annotationSvg(preview=null){const anns=STATE.annotations||[];let body='';
  for(const a of anns.filter(x=>x.type==='square')){const c=boardCoords(a.from);body+=`<rect x="${c.x+.05}" y="${c.y+.05}" width=".9" height=".9" rx=".07" fill="${ANNOTATION_COLORS[a.color]}" opacity=".38"/>`;}
  for(const a of anns.filter(x=>x.type==='arrow'))body+=annotationLine(a.from,a.to,a.color);
  if(preview&&preview.from!==preview.to)body+=annotationLine(preview.from,preview.to,preview.color,true);
- const defs=Object.entries(ANNOTATION_COLORS).map(([k,c])=>`<marker id="ann-${k}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="8.1" refY="5" markerWidth="3.6" markerHeight="3.6" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="${c}"/></marker>`).join('');
+ const defs=Object.entries(ANNOTATION_COLORS).map(([k,c])=>`<marker id="ann-${k}" markerUnits="userSpaceOnUse" viewBox="0 0 10 10" refX="8.1" refY="5" markerWidth=".38" markerHeight=".38" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="${c}"/></marker>`).join('');
  return `<svg class="annotation-svg" viewBox="0 0 8 8" preserveAspectRatio="none" aria-hidden="true"><defs>${defs}</defs>${body}</svg>`;
 }
 function commitAnnotation(from,to){const g=STATE.game;if(!g||from<0||to<0)return;const color=STATE.annotationColor;
