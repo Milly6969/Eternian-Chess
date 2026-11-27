@@ -877,7 +877,7 @@ for(let threshold=825;threshold<=1975;threshold+=50){
 
 const STORAGE_KEY='grayskull-chess-v1.0';
 const UNLOCK_SCORE=500;
-const DEF_SETTINGS={name:'Player',color:'white',sound:true,pieceStyle:'themed',legalDots:true,dialogue:'normal',hints:true,takebacks:true};
+const DEF_SETTINGS={name:'Player',color:'white',sound:true,pieceStyle:'themed',legalDots:true,dialogue:'normal',hints:true,takebacks:true,botEngine:'stockfish'};
 const newRecords=()=>Object.fromEntries(BOTS.map(b=>[b.id,{w:0,l:0,d:0}]));
 // Never embed a real player's scores in the public application.
 function mergeUserRecords(current){return {...current};}
@@ -1449,7 +1449,7 @@ function renderRecords(){const rows=shownBots().map(({b})=>b.eloUnlock&&!unlocke
  (()=>{const r=STATE.records[b.id]||{w:0,l:0,d:0};return `<tr><td><span class="record-opponent">${portrait(b.id,'record-portrait')} ${escapeHtml(b.name)}</span></td><td>${r.w}</td><td>${r.l}</td><td>${r.d}</td><td>${b.id==='twobad'||(b.eloUnlock&&unlockedBot(b))?'Unlocked':'—'}</td><td>${b.points||'—'}</td></tr>`;})()).join('');
  return `<section class="panel pad settings-box"><h2 class="section-title">Battle Records</h2><table class="record-table"><thead><tr><th>Opponent</th><th>Won</th><th>Lost</th><th>Draw</th><th>Unlock</th><th>Win pts</th></tr></thead><tbody>${rows}</tbody></table><div class="row" style="margin-top:18px">${button('choose','Choose opponent','')}${button('home','Home','secondary')}${button('export-progress','Save progress backup','secondary')}${button('refresh-rating','↻ Refresh Elo','soft')}</div></section>${powerMeters()}`;}
 function audioUploadRow(a){return `<div class="audio-row"><div class="audio-label"><strong>${escapeHtml(a.name)}</strong><span>${escapeHtml(STATE.audioNames[a.id]||'No audio selected')}</span></div><label class="upload-pill">Choose file<input type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a" data-audio-key="${a.id}" /></label><button class="audio-small" data-action="test-audio" data-key="${a.id}" ${!STATE.audioNames[a.id]?'disabled':''} title="Preview sound">▶</button><button class="audio-small" data-action="delete-audio" data-key="${a.id}" ${!STATE.audioNames[a.id]?'disabled':''} title="Remove sound">✕</button></div>`;}
-function renderSettings(){const o=STATE.settings;return `<section class="panel pad settings-box"><h2 class="section-title">Game Settings</h2><p class="introline">These settings save automatically.</p><h3 class="settings-profile-title">Player profile</h3><div class="setting-row"><label for="setting-name">Player name</label><input type="text" id="setting-name" maxlength="24" placeholder="Player" autocomplete="off" value="${escapeHtml(o.name)}" /></div><h3 class="settings-profile-title">Chess accounts</h3><p class="settings-privacy">Usernames are saved only on this device. They are not built into the app or uploaded to GitHub.</p><div class="setting-row"><label for="setting-chesscom">Chess.com username</label><input type="text" id="setting-chesscom" maxlength="40" placeholder="Chess.com username" autocomplete="off" autocapitalize="none" spellcheck="false" value="${escapeHtml(STATE.elo.username||'')}" /></div><div class="setting-row"><label for="setting-lichess">Lichess username</label><input type="text" id="setting-lichess" maxlength="40" placeholder="Optional, for future integration" autocomplete="off" autocapitalize="none" spellcheck="false" value="${escapeHtml(STATE.elo.lichessUsername||'')}" /></div><p class="settings-privacy">Chess.com rating can update automatically when an account is entered; Lichess is saved for future support and does not yet affect unlocks.</p><div class="setting-row"><label for="setting-elo-mode">Chess.com rating type</label><select id="setting-elo-mode"><option value="rapid" ${STATE.elo.timeControl==='rapid'?'selected':''}>Rapid</option><option value="blitz" ${STATE.elo.timeControl==='blitz'?'selected':''}>Blitz</option><option value="bullet" ${STATE.elo.timeControl==='bullet'?'selected':''}>Bullet</option><option value="daily" ${STATE.elo.timeControl==='daily'?'selected':''}>Daily</option></select></div><p class="elo-note"><strong>Chess.com:</strong> ${STATE.elo.username?escapeHtml(STATE.elo.username):'No username entered'} · ${STATE.elo.rating} Elo (${escapeHtml(eloDisplaySource())}). ${STATE.elo.status==='offline'?escapeHtml(STATE.elo.error||'Online rating unavailable; the saved rating is still available.'):''}</p><div class="elo-controls"><button data-action="refresh-rating">↻ Refresh Chess.com Elo</button><button data-action="manual-rating">Enter rating manually</button></div><p class="smallcopy">Chess.com rating data is from the public API. This fan game is not affiliated with Chess.com.</p><div class="setting-row"><label for="setting-piece-style">Piece style</label><select id="setting-piece-style"><option value="themed" ${o.pieceStyle==='themed'?'selected':''}>Masters of the Universe (3-D)</option><option value="2d-final" ${o.pieceStyle==='2d-final'?'selected':''}>Masters of the Universe (Final 2-D)</option><option value="merida" ${o.pieceStyle==='merida'?'selected':''}>Merida (classic)</option></select></div><div class="setting-row"><label for="setting-color">Default colour</label><select id="setting-color"><option value="white" ${o.color==='white'?'selected':''}>White</option><option value="black" ${o.color==='black'?'selected':''}>Black</option><option value="random" ${o.color==='random'?'selected':''}>Random</option></select></div><div class="setting-row"><label for="setting-dots">Show legal moves</label><input type="checkbox" id="setting-dots" ${o.legalDots?'checked':''}/></div><div class="setting-row"><label for="setting-hints">Sorceress hints</label><input type="checkbox" id="setting-hints" ${o.hints?'checked':''}/></div><div class="setting-row"><label for="setting-undo">Orko takebacks</label><input type="checkbox" id="setting-undo" ${o.takebacks?'checked':''}/></div><div class="setting-row"><label for="setting-sound">All sound</label><input type="checkbox" id="setting-sound" ${o.sound?'checked':''}/></div><div class="setting-row"><label for="setting-dialogue">Bot dialogue</label><select id="setting-dialogue"><option value="quiet" ${o.dialogue==='quiet'?'selected':''}>Quiet</option><option value="normal" ${o.dialogue==='normal'?'selected':''}>Normal</option><option value="chatty" ${o.dialogue==='chatty'?'selected':''}>Chatty</option></select></div><div class="row" style="margin-bottom:12px">${button('test-sound','♫ Test magic sound','ghost')}</div><details class="audio-settings-menu"><summary>🎵 Custom sound files</summary><div class="custom-audio"><p class="smallcopy">Choose optional audio clips. Every clip plays once, and the top sound button mutes all of them. Opponent dialogue remains text-only.</p><h3 class="audio-group-title">Screen sounds</h3><p class="audio-group-desc">Each plays once when its screen is opened. The home track also plays once per visit.</p>${[
+function renderSettings(){const o=STATE.settings;return `<section class="panel pad settings-box"><h2 class="section-title">Game Settings</h2><p class="introline">These settings save automatically.</p><h3 class="settings-profile-title">Player profile</h3><div class="setting-row"><label for="setting-name">Player name</label><input type="text" id="setting-name" maxlength="24" placeholder="Player" autocomplete="off" value="${escapeHtml(o.name)}" /></div><h3 class="settings-profile-title">Chess opponent engine — testing</h3><div class="setting-row"><label for="setting-bot-engine">Bot move engine</label><select id="setting-bot-engine"><option value="stockfish" ${o.botEngine!=='classic'?'selected':''}>Stockfish Lite (experimental)</option><option value="classic" ${o.botEngine==='classic'?'selected':''}>Classic AI (previous version)</option></select></div><p class="settings-privacy">Stockfish status: ${sfStatus}. Hover Bot stays random; Two-Bad retains his alternating personalities and theatrical takeback. Other bot strengths are provisional until testing against Chess.com bots. If Stockfish cannot load, the original AI is used automatically.</p><h3 class="settings-profile-title">Chess accounts</h3><p class="settings-privacy">Usernames are saved only on this device. They are not built into the app or uploaded to GitHub.</p><div class="setting-row"><label for="setting-chesscom">Chess.com username</label><input type="text" id="setting-chesscom" maxlength="40" placeholder="Chess.com username" autocomplete="off" autocapitalize="none" spellcheck="false" value="${escapeHtml(STATE.elo.username||'')}" /></div><div class="setting-row"><label for="setting-lichess">Lichess username</label><input type="text" id="setting-lichess" maxlength="40" placeholder="Optional, for future integration" autocomplete="off" autocapitalize="none" spellcheck="false" value="${escapeHtml(STATE.elo.lichessUsername||'')}" /></div><p class="settings-privacy">Chess.com rating can update automatically when an account is entered; Lichess is saved for future support and does not yet affect unlocks.</p><div class="setting-row"><label for="setting-elo-mode">Chess.com rating type</label><select id="setting-elo-mode"><option value="rapid" ${STATE.elo.timeControl==='rapid'?'selected':''}>Rapid</option><option value="blitz" ${STATE.elo.timeControl==='blitz'?'selected':''}>Blitz</option><option value="bullet" ${STATE.elo.timeControl==='bullet'?'selected':''}>Bullet</option><option value="daily" ${STATE.elo.timeControl==='daily'?'selected':''}>Daily</option></select></div><p class="elo-note"><strong>Chess.com:</strong> ${STATE.elo.username?escapeHtml(STATE.elo.username):'No username entered'} · ${STATE.elo.rating} Elo (${escapeHtml(eloDisplaySource())}). ${STATE.elo.status==='offline'?escapeHtml(STATE.elo.error||'Online rating unavailable; the saved rating is still available.'):''}</p><div class="elo-controls"><button data-action="refresh-rating">↻ Refresh Chess.com Elo</button><button data-action="manual-rating">Enter rating manually</button></div><p class="smallcopy">Chess.com rating data is from the public API. This fan game is not affiliated with Chess.com.</p><div class="setting-row"><label for="setting-piece-style">Piece style</label><select id="setting-piece-style"><option value="themed" ${o.pieceStyle==='themed'?'selected':''}>Masters of the Universe (3-D)</option><option value="2d-final" ${o.pieceStyle==='2d-final'?'selected':''}>Masters of the Universe (Final 2-D)</option><option value="merida" ${o.pieceStyle==='merida'?'selected':''}>Merida (classic)</option></select></div><div class="setting-row"><label for="setting-color">Default colour</label><select id="setting-color"><option value="white" ${o.color==='white'?'selected':''}>White</option><option value="black" ${o.color==='black'?'selected':''}>Black</option><option value="random" ${o.color==='random'?'selected':''}>Random</option></select></div><div class="setting-row"><label for="setting-dots">Show legal moves</label><input type="checkbox" id="setting-dots" ${o.legalDots?'checked':''}/></div><div class="setting-row"><label for="setting-hints">Sorceress hints</label><input type="checkbox" id="setting-hints" ${o.hints?'checked':''}/></div><div class="setting-row"><label for="setting-undo">Orko takebacks</label><input type="checkbox" id="setting-undo" ${o.takebacks?'checked':''}/></div><div class="setting-row"><label for="setting-sound">All sound</label><input type="checkbox" id="setting-sound" ${o.sound?'checked':''}/></div><div class="setting-row"><label for="setting-dialogue">Bot dialogue</label><select id="setting-dialogue"><option value="quiet" ${o.dialogue==='quiet'?'selected':''}>Quiet</option><option value="normal" ${o.dialogue==='normal'?'selected':''}>Normal</option><option value="chatty" ${o.dialogue==='chatty'?'selected':''}>Chatty</option></select></div><div class="row" style="margin-bottom:12px">${button('test-sound','♫ Test magic sound','ghost')}</div><details class="audio-settings-menu"><summary>🎵 Custom sound files</summary><div class="custom-audio"><p class="smallcopy">Choose optional audio clips. Every clip plays once, and the top sound button mutes all of them. Opponent dialogue remains text-only.</p><h3 class="audio-group-title">Screen sounds</h3><p class="audio-group-desc">Each plays once when its screen is opened. The home track also plays once per visit.</p>${[
 {id:'home',name:'Home screen'},
 {id:'page-choose',name:'Choose Your Enemy screen'},
 {id:'page-records',name:'Records screen'},
@@ -1457,7 +1457,7 @@ function renderSettings(){const o=STATE.settings;return `<section class="panel p
 ].map(a=>audioUploadRow(a)).join('')}<h3 class="audio-group-title">Opponent sounds</h3><p class="audio-group-desc">Main sound: when selected, when the battle begins, and when the opponent wins or draws. Defeat sound: when the player beats them.</p>${BOTS.slice(0,7).flatMap(b=>[
 {id:b.id,name:b.name+' — selected / start / win / draw'},
 {id:b.id+'-defeat',name:b.name+' — defeated'}
-]).map(a=>audioUploadRow(a)).join('')}</div></details><p class="smallcopy">Uploaded audio stays in this browser's local storage. Your files are not sent to a server. Some browsers require an initial tap before home-screen music can start.</p><p class="smallcopy">Bot dialogue stays silent. Uploaded opponent clips play only at selection, battle start, and results. Ordinary chess effects are retained.</p><p class="smallcopy">Exact Lichess Merida pieces load when online; if unavailable the bundled Staunton fallback is shown. Merida artwork: Armando Hernandez Marroquin, GPLv2+. The included lightweight chess AI offers several difficulty levels, but is not yet calibrated to Chess.com Elo. A Stockfish-backed edition is the planned upgrade for stronger, more consistent high-level play.</p><h3 class="settings-profile-title">Move progress to another device</h3><p class="settings-privacy">Download a backup on the old device, then import it here. Personal settings and ratings travel only in the backup file you choose, not in the published app.</p><div class="row" style="margin-bottom:16px">${button('export-progress','Download progress backup','secondary')}<label class="btn soft backup-upload" for="import-progress-file">Import progress backup<input type="file" id="import-progress-file" accept=".json,application/json" /></label></div><div class="row">${button('home','Back to home','')}${STATE.game?button('resume','Return to game','secondary'):''}</div></section>`;}
+]).map(a=>audioUploadRow(a)).join('')}</div></details><p class="smallcopy">Uploaded audio stays in this browser's local storage. Your files are not sent to a server. Some browsers require an initial tap before home-screen music can start.</p><p class="smallcopy">Bot dialogue stays silent. Uploaded opponent clips play only at selection, battle start, and results. Ordinary chess effects are retained.</p><p class="smallcopy">Exact Lichess Merida pieces load when online; if unavailable the bundled Staunton fallback is shown. Merida artwork: Armando Hernandez Marroquin, GPLv2+. The included lightweight chess AI offers several difficulty levels, but is not yet calibrated to Chess.com Elo. Stockfish Lite can now be enabled in Settings after installing its WASM assets. Bot difficulty is experimental and being calibrated against Chess.com bots.</p><h3 class="settings-profile-title">Move progress to another device</h3><p class="settings-privacy">Download a backup on the old device, then import it here. Personal settings and ratings travel only in the backup file you choose, not in the published app.</p><div class="row" style="margin-bottom:16px">${button('export-progress','Download progress backup','secondary')}<label class="btn soft backup-upload" for="import-progress-file">Import progress backup<input type="file" id="import-progress-file" accept=".json,application/json" /></label></div><div class="row">${button('home','Back to home','')}${STATE.game?button('resume','Return to game','secondary'):''}</div></section>`;}
 let toastTimer,botTimer,gameToken=0;
 let speechTimer=null,speechQueue=[],speechActive=false,speechRevealTimer=null;
 function clearSpeechQueue(){
@@ -1634,14 +1634,102 @@ function fakerPick(s){
  for(let i=0;i<choices.length;i++){r-=weighted[i];if(r<=0)return choices[i].m;}
  return choices[0].m;
 }
+/* Stockfish Lite single-threaded WASM adapter (optional, offline after assets are installed).
+   Original ChessCore still validates all moves and preserves variant/special-effect logic.
+   Engine settings are experimental opponent tuning, NOT human Elo estimates. */
+let sfWorker=null,sfInit=null,sfReadyResolve=null,sfQuery=null;
+let sfStatus='not loaded';
+function sfShutdown(reason){
+  if(sfWorker){try{sfWorker.terminate()}catch{}}
+  sfWorker=null;
+  if(sfReadyResolve){const resolve=sfReadyResolve;sfReadyResolve=null;resolve(false)}
+  if(sfQuery){const q=sfQuery;sfQuery=null;clearTimeout(q.timer);q.resolve(null)}
+  sfInit=null;sfStatus=reason||'unavailable (classic fallback)';
+}
+function sfStart(){
+  if(sfInit)return sfInit;
+  if(typeof Worker==='undefined'||location.protocol==='file:'){
+    sfStatus='requires GitHub Pages (classic fallback)';return Promise.resolve(false);
+  }
+  sfStatus='loading';
+  sfInit=new Promise(resolve=>{
+    sfReadyResolve=resolve;
+    let readyTimer=setTimeout(()=>{sfShutdown('engine loading timed out');},15000);
+    try{
+      sfWorker=new Worker(new URL('./stockfish/stockfish-19-lite-single.js',document.baseURI));
+      sfWorker.onerror=e=>{console.warn('Stockfish worker error',e.message);clearTimeout(readyTimer);sfShutdown('files missing or engine failed');};
+      sfWorker.onmessage=e=>{
+        const messages=String(e.data||'').split(/[\r\n]+/);
+        for(const raw of messages){const line=raw.trim();if(!line)continue;
+          if(line==='uciok'){
+            sfWorker?.postMessage('setoption name Hash value 8');
+            sfWorker?.postMessage('isready');
+          }else if(line==='readyok'&&sfReadyResolve){
+            clearTimeout(readyTimer);const done=sfReadyResolve;sfReadyResolve=null;
+            sfStatus='ready (Stockfish 19 Lite)';done(true);
+          }else if(line.startsWith('bestmove ')&&sfQuery){
+            const q=sfQuery;sfQuery=null;clearTimeout(q.timer);
+            q.resolve((/^bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/.exec(line)||[])[1]||null);
+          }
+        }
+      };
+      sfWorker.postMessage('uci');
+    }catch(e){clearTimeout(readyTimer);console.warn('Stockfish unavailable',e);sfShutdown('worker unavailable');}
+  });
+  return sfInit;
+}
+async function sfFindUci(s,skill,movetime){
+  if(!(await sfStart())||!sfWorker||sfQuery)return null;
+  return new Promise(resolve=>{
+    const timer=setTimeout(()=>{sfShutdown('search timed out');resolve(null)},6500);
+    sfQuery={resolve,timer};
+    try{
+      sfWorker.postMessage('setoption name UCI_LimitStrength value false');
+      sfWorker.postMessage('setoption name MultiPV value 1');
+      sfWorker.postMessage('setoption name Skill Level value '+skill);
+      sfWorker.postMessage('position fen '+C.fen(s));
+      sfWorker.postMessage('go movetime '+movetime);
+    }catch(e){console.warn('Stockfish search error',e);sfShutdown('search error')}
+  });
+}
+async function pickWithStockfish(s,g){
+  const id=BOTS[g.bot].id,level=BOTS[g.bot].level;
+  if(STATE.settings.botEngine==='classic'||id==='hover'||id==='twobad'||id==='faker')return null;
+  // Explicit provisional calibration: Chess.com bot labels are NOT human Elo ratings.
+  // Deliberate classic moves make novice opponents less relentlessly tactical.
+  const profile={
+    beast:{skill:0,ms:100,classicChance:.36,classicLevel:1},
+    merman:{skill:1,ms:140,classicChance:.17,classicLevel:2},
+    triklops:{skill:4,ms:200,classicChance:.05,classicLevel:3},
+    evillyn:{skill:8,ms:250,classicChance:0,classicLevel:4},
+    skeletor:{skill:13,ms:360,classicChance:0,classicLevel:5},
+    trapjaw:{skill:6,ms:220,classicChance:.05,classicLevel:3},
+    stinkor:{skill:7,ms:230,classicChance:.03,classicLevel:4},
+    scareglow:{skill:10,ms:280,classicChance:0,classicLevel:4}
+  }[id]||{skill:Math.min(15,Math.max(0,level*3)),ms:200,classicChance:0,classicLevel:Math.min(5,level)};
+  // Initialize the worker even if this move uses a Classic-style lapse.
+  const ready=await sfStart();
+  if(!ready)return null;
+  if(Math.random()<profile.classicChance)return C.choose(s,profile.classicLevel);
+  const uci=await sfFindUci(s,profile.skill,profile.ms);
+  if(!uci)return null;
+  return C.legal(s).find(m=>C.key(m)===uci)||null;
+}
+
 function queueBot(){
  const g=STATE.game;if(!g||g.result||g.h.at(-1).t===g.player)return;
  STATE.thinking=true;render();const token=gameToken;
  clearTimeout(botTimer);
- botTimer=setTimeout(()=>{
+ botTimer=setTimeout(async ()=>{
   if(token!==gameToken||!STATE.game||STATE.game.result)return;
   let move;const twoBad=g.bot===6;
-  try{move=twoBad?twoBadPick(g.h.at(-1),g):BOTS[g.bot].id==='faker'?fakerPick(g.h.at(-1)):C.choose(g.h.at(-1),BOTS[g.bot].level);}catch(e){console.error('AI failed',e);move=rand(C.legal(g.h.at(-1)));}
+  try{
+    if(!twoBad)move=await pickWithStockfish(g.h.at(-1),g);
+    // The original AI is always available if the engine is missing or disabled.
+    if(!move)move=twoBad?twoBadPick(g.h.at(-1),g):BOTS[g.bot].id==='faker'?fakerPick(g.h.at(-1)):C.choose(g.h.at(-1),BOTS[g.bot].level);
+  }catch(e){console.error('AI failed',e);move=rand(C.legal(g.h.at(-1)));}
+  // Never apply results from an abandoned game, changed position, or takeback.
+  if(token!==gameToken||STATE.game!==g||g.result||g.h.at(-1).t===g.player)return;
   if(!move){STATE.thinking=false;maybeFinish();return;}
   if(twoBad&&Math.random()<.29){
     const s=g.h.at(-1),alternatives=C.legal(s).filter(x=>C.key(x)!==C.key(move));
@@ -1790,7 +1878,7 @@ $.addEventListener('change',async event=>{
  if(el.id==='setting-lichess'){STATE.elo.lichessUsername=el.value.trim().slice(0,40);persist();return;}
  if(el.id==='setting-elo-mode'){if(['rapid','blitz','bullet','daily'].includes(el.value)){STATE.elo.timeControl=el.value;STATE.elo.checkedAt=0;persist();refreshChessRating(true);}return;}
  if(el.id==='choose-color'){STATE.settings.color=el.value;persist();return;}
- if(el.id==='setting-piece-style'){STATE.settings.pieceStyle=['merida','2d-final'].includes(el.value)?el.value:'themed';persist();render();return;}
+ if(el.id==='setting-bot-engine'){STATE.settings.botEngine=el.value==='classic'?'classic':'stockfish';persist();render();return;}  if(el.id==='setting-piece-style'){STATE.settings.pieceStyle=['merida','2d-final'].includes(el.value)?el.value:'themed';persist();render();return;}
  if(el.id==='setting-color'){STATE.settings.color=el.value;persist();return;}
  if(el.id==='setting-dialogue'){STATE.settings.dialogue=el.value;persist();return;}
  if(el.id==='setting-dots'){STATE.settings.legalDots=el.checked;persist();return;}
@@ -1810,6 +1898,6 @@ window.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement||e
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 persist();render();fetchMeridaPieces();if(STATE.screen==='home')playCustomAudio('home',false);refreshChessRating(false);
 // Narrow test API for functional testing; not shown in UI.
-window.__grayskullTest={state:STATE,core:C,go:perform,start:startGame,move:playMove,finish:maybeFinish,undo:takeback,trapJawCapture:animateTrapJawCapture,twoBadPick,unlockScore:UNLOCK_SCORE,refreshChessRating,setEloRating,nextMilestone,shownBots,useOrb,activeNegatableEffect,orbPercent,playCustomAudio,stopAllAudio,getHomeAudio:()=>currentMusic};
+window.__grayskullTest={state:STATE,core:C,stockfishStatus:()=>sfStatus,go:perform,start:startGame,move:playMove,finish:maybeFinish,undo:takeback,trapJawCapture:animateTrapJawCapture,twoBadPick,unlockScore:UNLOCK_SCORE,refreshChessRating,setEloRating,nextMilestone,shownBots,useOrb,activeNegatableEffect,orbPercent,playCustomAudio,stopAllAudio,getHomeAudio:()=>currentMusic};
 })();
 </script></body></html>
